@@ -1,68 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Interest Calculator</title>
     <link rel="stylesheet" href="./bootstrap-5.3.3/css/bootstrap.min.css">
-</head>
-<body>
-<section class="py-5">
-    <div class="container">
-        <h1 class="mb-4">Simple Interest Calculator</h1>
-        
-        <form id="interestForm">
-            <div class="mb-3">
-                <label for="amount" class="form-label">Amount</label>
-                <input type="number" class="form-control" id="amount" placeholder="Enter amount">
-            </div>
-            <div class="mb-3">
-                <label for="rate" class="form-label">Rate (%)</label>
-                <input type="number" class="form-control" id="rate" placeholder="Enter rate">
-            </div>
-            <div class="mb-3">
-                <label for="period" class="form-label">Period</label>
-                <div class="input-group">
-                    <input type="number" class="form-control" id="time" placeholder="Enter time">
-                    <select class="form-select" id="period">
-                        <option value="hour">Hour</option>
-                        <option value="day">Day</option>
-                        <option value="month">Month</option>
-                        <option value="year">Year</option>
-                    </select>
-                </div>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="calculateInterest()">Calculate Interest</button>
-        </form>
-        
-        <div class="mt-4">
-            <h4>Interest: <span id="interestResult">0</span></h4>
-            <h4>Total Amount: <span id="totalAmount">0</span></h4>
-        </div>
-    </div>
-</section>
-
-<script src="./bootstrap-5.3.3/js/bootstrap.bundle.min.js"></script>
-<script>
-    function calculateInterest() {
-        const amount = parseFloat(document.getElementById('amount').value);
-        const rate = parseFloat(document.getElementById('rate').value);
-        const time = parseFloat(document.getElementById('time').value);
-        const period = document.getElementById('period').value;
-
-        let timeInYears = time;
-        if (period === 'hour') {
-            timeInYears = time / (24 * 365);
-        } else if (period === 'day') {
-            timeInYears = time / 365;
-        } else if (period === 'month') {
-            timeInYears = time / 12;
+    <style>
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
-        const interest = (amount * rate * timeInYears) / 100;
-        document.getElementById('interestResult').innerText = interest.toFixed(2);
-        document.getElementById('totalAmount').innerText = (amount + interest).toFixed(2);
-    }
-</script>
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+
+<body>
+    <section>
+        <div class="container col-xl-11 col-xxl-9 px-4 py-5">
+            <h1 class="mb-4 text-center">Simple Interest Calculator</h1>
+            <div class="row align-items-center flex-row-reverse g-lg-5 py-5">
+                <div class="col-md-10 mx-auto col-lg-7">
+                    <form class="p-4 p-md-5 border border-secondary rounded-3" id="interestForm">
+                        <input type="hidden" name="redirect" value="/thanks.html">
+
+                        <div class="form-floating mb-3">
+                            <input type="number" id="amount" name="amount" class="form-control"
+                                placeholder="Enter amount">
+                            <label for="amount">Amount</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="number" id="rate" name="rate" class="form-control" placeholder="Enter rate">
+                            <label for="rate">Rate (%)</label>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6 col-sm-8">
+                                <div class="form-floating mb-3">
+                                    <input type="number" id="time" name="time" class="form-control"
+                                        placeholder="Enter time period">
+                                    <label for="time">Time Period</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <div class="form-floating mb-2">
+                                    <select class="form-select rounded-3 border-secondary" id="period" name="period">
+                                        <option value="year">Year</option>
+                                        <option value="month">Month</option>
+                                        <option value="day">Day</option>
+                                        <option value="hour">Hour</option>
+                                    </select>
+                                    <label for="period" class="text-secondary">Period</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="w-100 btn btn-lg btn-secondary"
+                            onclick="calculateInterest()">Calculate Interest</button>
+                    </form>
+                </div>
+                <div class="col-lg-5 text-center text-lg-start mt-4 mt-sm-0">
+                    <div class="lead fw-medium lh-1 mb-2">Interest:</div>
+                    <div class="display-5 fw-medium lh-1 mb-3"><span id="interestResult">0</span></div>
+                    <div class="lead fw-medium lh-1 mb-2">Total Amount:</div>
+                    <div class="display-5 fw-medium lh-1 mb-3"><span id="totalAmount">0</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="./bootstrap-5.3.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function calculateInterest() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const rate = parseFloat(document.getElementById('rate').value);
+            const time = parseFloat(document.getElementById('time').value);
+            const period = document.getElementById('period').value;
+
+            if (isNaN(amount) || isNaN(rate) || isNaN(time)) {
+                alert("Please enter valid values for Amount, Rate, and Time.");
+                return;
+            }
+
+            let timeInYears = time;
+            if (period === 'hour') {
+                timeInYears = time / (24 * 365);
+            } else if (period === 'day') {
+                timeInYears = time / 365;
+            } else if (period === 'month') {
+                timeInYears = time / 12;
+            }
+
+            const interest = (amount * rate * timeInYears) / 100;
+            document.getElementById('interestResult').innerText = interest.toFixed(2);
+            document.getElementById('totalAmount').innerText = (amount + interest).toFixed(2);
+        }
+    </script>
 </body>
+
 </html>
