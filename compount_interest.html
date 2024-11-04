@@ -33,10 +33,25 @@
                             <input type="number" id="amount" name="amount" class="form-control" placeholder="Enter amount" min="0" step="any">
                             <label for="amount">Amount</label>
                         </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="number" id="rate" name="rate" class="form-control" placeholder="Enter rate" min="0" step="any">
-                            <label for="rate">Rate (%)</label>
+                        <div class="row g-3">
+                            <div class="col-6 col-sm-8">
+                                <div class="form-floating mb-3">
+                                    <input type="number" id="rate" name="rate" class="form-control" placeholder="Enter rate" min="0" step="any">
+                                    <label for="rate">Rate (%)</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <div class="form-floating mb-2">
+                                    <select class="form-select rounded-3 border-secondary" id="ratePeriod" name="ratePeriod" required>
+                                        <option value="annual">Annual</option>
+                                        <option value="quarterly">Quarterly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="daily">Daily</option>
+                                    </select>
+                                    <label for="ratePeriod" class="text-secondary">Rate Applied</label>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row g-3">
@@ -54,7 +69,7 @@
                                         <option value="day">Day</option>
                                         <option value="hour">Hour</option>
                                     </select>
-                                    <label for="period" class="text-secondary">Period</label>
+                                    <label for="period" class="text-secondary">Time Unit</label>
                                 </div>
                             </div>
                         </div>
@@ -77,32 +92,39 @@
             const amount = parseFloat(document.getElementById('amount').value);
             const rate = parseFloat(document.getElementById('rate').value) / 100; // Convert percentage to decimal
             const time = parseFloat(document.getElementById('time').value);
-            const period = document.getElementById('period').value;
+            const timePeriod = document.getElementById('period').value;
+            const ratePeriod = document.getElementById('ratePeriod').value;
 
             if (isNaN(amount) || isNaN(rate) || isNaN(time) || time <= 0 || amount <= 0 || rate <= 0) {
                 alert("Please enter valid positive values for Amount, Rate, and Time.");
                 return;
             }
 
-            let n; // Number of times interest is compounded per year
-            switch (period) {
-                case 'hour':
-                    n = 24 * 365; // Compounded hourly
+            // Set `n` based on how often interest is applied (ratePeriod)
+            let n;
+            switch (ratePeriod) {
+                case 'annual':
+                    n = 1;
                     break;
-                case 'day':
-                    n = 365; // Compounded daily
+                case 'quarterly':
+                    n = 4;
                     break;
-                case 'month':
-                    n = 12; // Compounded monthly
+                case 'monthly':
+                    n = 12;
                     break;
-                case 'year':
+                case 'weekly':
+                    n = 52;
+                    break;
+                case 'daily':
+                    n = 365;
+                    break;
                 default:
-                    n = 1; // Compounded annually
+                    n = 1;
             }
 
-            // Convert time to years based on the period
-            let timeInYears = time;
-            switch (period) {
+            // Convert the time to years based on `timePeriod`
+            let timeInYears;
+            switch (timePeriod) {
                 case 'hour':
                     timeInYears = time / (24 * 365);
                     break;
