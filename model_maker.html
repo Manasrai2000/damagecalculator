@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON to Dart Model Converter</title>
+    <link rel="stylesheet" href="./bootstrap-5.3.3/css/bootstrap.min.css">
+    <style>
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f8f9fa;
+        }
+        .option-checkbox {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">JSON to Dart Model Converter</a>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container mt-4">
+    <div class="row mb-3">
+        <!-- Model Name Input -->
+        <div class="col-md-4">
+            <h5>Model Options</h5>
+            <input id="modelName" class="form-control mb-3" type="text" placeholder="Enter Model Name" value="Example" oninput="generateDartModel()">
+            
+            <!-- Toggle Options -->
+            <div class="form-check option-checkbox">
+                <input class="form-check-input" type="checkbox" id="nullSafety" checked onchange="generateDartModel()">
+                <label class="form-check-label" for="nullSafety">Null Safety</label>
+            </div>
+            <div class="form-check option-checkbox">
+                <input class="form-check-input" type="checkbox" id="typesOnly" onchange="generateDartModel()">
+                <label class="form-check-label" for="typesOnly">Types Only</label>
+            </div>
+            <div class="form-check option-checkbox">
+                <input class="form-check-input" type="checkbox" id="makeRequired" onchange="generateDartModel()">
+                <label class="form-check-label" for="makeRequired">Make all properties required</label>
+            </div>
+            <div class="form-check option-checkbox">
+                <input class="form-check-input" type="checkbox" id="generateCopyWith" onchange="generateDartModel()">
+                <label class="form-check-label" for="generateCopyWith">Generate CopyWith method</label>
+            </div>
+            <div class="form-check option-checkbox">
+                <input class="form-check-input" type="checkbox" id="putEncoderDecoder" onchange="generateDartModel()">
+                <label class="form-check-label" for="putEncoderDecoder">Put encoder & decoder in Class</label>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="col-md-4">
+            <h5>Paste your JSON here:</h5>
+            <textarea id="jsonInput" class="form-control" rows="12" placeholder="Paste JSON..." oninput="generateDartModel()"></textarea>
+        </div>
+
+        <!-- Output Section -->
+        <div class="col-md-4">
+            <h5>Generated Dart Model:</h5>
+            <pre id="dartOutput" class="p-3 border" style="min-height: 240px;">Your Dart model will appear here...</pre>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="./bootstrap-5.3.3/js/bootstrap.bundle.min.js"></script>
+<script>
+    function generateDartModel() {
+        const jsonInput = document.getElementById('jsonInput').value;
+        const modelName = document.getElementById('modelName').value || 'Example';
+        const nullSafety = document.getElementById('nullSafety').checked;
+        const typesOnly = document.getElementById('typesOnly').checked;
+        const makeRequired = document.getElementById('makeRequired').checked;
+        const generateCopyWith = document.getElementById('generateCopyWith').checked;
+        const putEncoderDecoder = document.getElementById('putEncoderDecoder').checked;
+        const outputElement = document.getElementById('dartOutput');
+
+        try {
+            const json = JSON.parse(jsonInput);
+
+            let dartModel = `class ${modelName} {\n`;
+
+            // Generate properties
+            for (const key in json) {
+                let type = 'String';
+                const value = json[key];
+                if (Array.isArray(value)) {
+                    type = 'List<dynamic>';
+                } else if (typeof value === 'number') {
+                    type = 'int';
+                } else if (typeof value === 'boolean') {
+                    type = 'bool';
+                }
+                const nullSafetyToken = nullSafety ? '?' : '';
+                const requiredToken = makeRequired ? 'required ' : '';
+                dartModel += `  ${requiredToken}final ${type}${nullSafetyToken} ${key};\n`;
+            }
+
+            // Constructor
+            dartModel += '\n  ' + modelName + '({\n';
+            for (const key in json) {
+                dartModel += `    ${makeRequired ? 'required ' : ''}this.${key},\n`;
+            }
+            dartModel += '  });\n';
+
+            // fromJson and toJson if enabled
+            if (putEncoderDecoder) {
+                dartModel += `\n  factory ${modelName}.fromJson(Map<String, dynamic> json) => ${modelName}(\n`;
+                for (const key in json) {
+                    dartModel += `    ${key}: json['${key}'],\n`;
+                }
+                dartModel += '  );\n';
+
+                dartModel += `\n  Map<String, dynamic> toJson() => {\n`;
+                for (const key in json) {
+                    dartModel += `    '${key}': ${key},\n`;
+                }
+                dartModel += '  };\n';
+            }
+
+            // Generate CopyWith method
+            if (generateCopyWith) {
+                dartModel += `\n  ${modelName} copyWith({\n`;
+                for (const key in json) {
+                    let type = 'String';
+                    if (Array.isArray(json[key])) type = 'List<dynamic>';
+                    else if (typeof json[key] === 'number') type = 'int';
+                    else if (typeof json[key] === 'boolean') type = 'bool';
+                    dartModel += `    ${type}? ${key},\n`;
+                }
+                dartModel += `  }) => ${modelName}(\n`;
+                for (const key in json) {
+                    dartModel += `    ${key}: ${key} ?? this.${key},\n`;
+                }
+                dartModel += '  );\n';
+            }
+
+            dartModel += '}';
+
+            outputElement.textContent = dartModel;
+        } catch (error) {
+            outputElement.textContent = 'Invalid JSON format!';
+        }
+    }
+</script>
+</body>
+</html>

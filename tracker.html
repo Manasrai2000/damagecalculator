@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damagecalculator</title>
+    <link rel="stylesheet" href="./bootstrap-5.3.3/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            height: 100%;
+        }
+
+        canvas {
+            max-height: 70vh;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-12">
+                    <div class="form-container mb-4">
+                        <label for="hours" class="form-label">Damage Tracker</label>
+                        <input type="number" id="hours" class="form-control" min="0" max="24" placeholder="Enter hours" />
+                        <button id="addData" class="btn btn-primary mt-3 w-100">Add Data</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-12">
+                    <canvas id="studyChart" class="w-100"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <script src="./bootstrap-5.3.3/js/bootstrap.bundle.min.js"></script> 
+    <script>
+        // Initialize chart data
+        const days = [];
+        const studyHours = [];
+        let dayCounter = 1;
+
+        // Create the chart
+        const ctx = document.getElementById('studyChart').getContext('2d');
+        const studyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: days,
+                datasets: [{
+                    label: 'Hours Studied',
+                    data: studyHours,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Hours'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Days'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Add event listener to the button
+        document.getElementById('addData').addEventListener('click', () => {
+            const hours = parseInt(document.getElementById('hours').value);
+
+            if (!isNaN(hours) && hours >= 0 && hours <= 24) {
+                // Add the next day and corresponding hours
+                days.push(`Day ${dayCounter}`);
+                studyHours.push(hours);
+                dayCounter++;
+
+                // Update the chart
+                studyChart.update();
+
+                // Clear input fields
+                document.getElementById('hours').value = '';
+            } else {
+                alert('Please enter a valid number of hours (0-24).');
+            }
+        });
+    </script>
+</body>
+</html>
