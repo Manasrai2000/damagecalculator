@@ -13,50 +13,69 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         section {
             flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
         }
 
-        .container {
-            height: 100%;
+        .input-card {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+            max-width: 300px;
+        }
+
+        .chart-container {
+            flex: 1;
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         canvas {
-            max-height: 70vh;
+            min-width: 1200px;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
         }
     </style>
 </head>
 <body>
     <section>
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-md-6 col-12">
-                    <div class="form-container mb-4">
-                        <label for="hours" class="form-label">Damage Tracker</label>
-                        <input type="number" id="hours" class="form-control" min="0" max="24" placeholder="Enter hours" />
-                        <button id="addData" class="btn btn-primary mt-3 w-100">Add Data</button>
-                    </div>
+        <div class="card input-card shadow">
+            <div class="card-body">
+                <h5 class="card-title">Damage Tracker</h5>
+                <div class="input-group">
+                    <input type="number" id="hours" class="form-control" min="0" max="24" placeholder="Enter hours" />
+                    <button id="addData" class="btn btn-primary">Add Data</button>
+                    <button id="clearData" class="btn btn-danger">Clear Data</button>
                 </div>
             </div>
-            <div class="row justify-content-center">
-                <div class="col-md-8 col-12">
-                    <canvas id="studyChart" class="w-100"></canvas>
-                </div>
-            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="studyChart"></canvas>
         </div>
     </section>
     
     <script src="./bootstrap-5.3.3/js/bootstrap.bundle.min.js"></script> 
     <script>
         // Initialize chart data
-        const days = [];
-        const studyHours = [];
-        let dayCounter = 1;
+        const days = JSON.parse(localStorage.getItem('days')) || [];
+        const studyHours = JSON.parse(localStorage.getItem('studyHours')) || [];
+        let dayCounter = days.length ? parseInt(days[days.length - 1].split(' ')[1]) + 1 : 1;
 
         // Create the chart
         const ctx = document.getElementById('studyChart').getContext('2d');
@@ -107,12 +126,23 @@
                 // Update the chart
                 studyChart.update();
 
+                // Save data to localStorage
+                localStorage.setItem('days', JSON.stringify(days));
+                localStorage.setItem('studyHours', JSON.stringify(studyHours));
+
                 // Clear input fields
                 document.getElementById('hours').value = '';
             } else {
                 alert('Please enter a valid number of hours (0-24).');
             }
         });
-    </script>
+
+        // Clear stored data
+        document.getElementById('clearData').addEventListener('click', () => {
+            localStorage.removeItem('days');
+            localStorage.removeItem('studyHours');
+            location.reload(); // Refresh to clear chart and data
+        });
+    </script>    
 </body>
 </html>
