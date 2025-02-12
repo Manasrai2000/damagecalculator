@@ -184,16 +184,26 @@ function checkAnswers() {
     let totalQuestions = data.PR_QUESTIONS.length;
     let questionCorrect = new Array(totalQuestions).fill(true);
 
-    document.querySelectorAll('.blank').forEach((blank, index) => {
-        let correctAnswer = blank.dataset.answer || blank.dataset.answerImg;
-        let userAnswer = blank.dataset.userAnswer;
+    // Group blanks by container
+    const containers = document.querySelectorAll('.container');
+    
+    containers.forEach((container, questionIndex) => {
+        const blanksInContainer = container.querySelectorAll('.blank');
+        let isQuestionCorrect = true;
 
-        if (userAnswer !== correctAnswer) {
-            blank.style.border = "2px solid red";
-            questionCorrect[Math.floor(index / 2)] = false;
-        } else {
-            blank.style.border = "2px solid green";
-        }
+        blanksInContainer.forEach(blank => {
+            const correctAnswer = blank.dataset.answer || blank.dataset.answerImg;
+            const userAnswer = blank.dataset.userAnswer;
+
+            if (!userAnswer || userAnswer !== correctAnswer) {
+                blank.style.border = "2px solid red";
+                isQuestionCorrect = false;
+            } else {
+                blank.style.border = "2px solid green";
+            }
+        });
+
+        questionCorrect[questionIndex] = isQuestionCorrect;
     });
 
     correctCount = questionCorrect.filter(isCorrect => isCorrect).length;
