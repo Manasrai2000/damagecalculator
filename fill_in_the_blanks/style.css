@@ -1,0 +1,94 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    text-align: center;
+    padding: 20px;
+}
+
+.blank {
+    display: inline-block;
+    width: 100px;
+    height: 30px;
+    border: 2px dashed #ccc;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.draggable {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 5px;
+    background-color: lightblue;
+    cursor: grab;
+    border: 1px solid #000;
+}
+
+img {
+    max-width: 100px;
+    max-height: 100px;
+    display: block;
+    margin: 5px;
+}
+
+.container {
+    background: white;
+    padding: 20px;
+    text-align: start;
+    margin: 10px auto;
+    border-radius: 10px;
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+    max-width: 600px;
+}
+
+.blank {
+    display: inline-block;
+    width: 100px;
+    height: 30px;
+    border: 2px dashed #007BFF;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+    line-height: 30px;
+    color: #007BFF;
+    background-color: #e9f5ff;
+    border-radius: 5px;
+}
+
+.draggable {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 5px;
+    background-color: #007BFF;
+    color: white;
+    font-weight: bold;
+    cursor: grab;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.draggable:active {
+    cursor: grabbing;
+}
+
+.correct {
+    border: 2px solid green !important;
+}
+
+.incorrect {
+    border: 2px solid red !important;
+}
+
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #218838;
+}
