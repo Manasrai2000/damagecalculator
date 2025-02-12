@@ -82,6 +82,9 @@ function addDragAndDropEvents() {
             dropTarget.textContent = word;
         }
         dropTarget.dataset.userAnswer = word;
+        dropTarget.style.border = '2px dashed rgba(151, 151, 151, 0)';
+        const resetButton = document.getElementById('resetBtn');
+        resetButton.style.display = 'inline-block';
     }
 
     document.querySelectorAll('.draggable').forEach(item => {
@@ -180,11 +183,19 @@ style.textContent = `
 document.head.appendChild(style);
 
 function checkAnswers() {
+    // First check if any answers are filled
+    const blanks = document.querySelectorAll('.blank');
+    const filledAnswers = Array.from(blanks).filter(blank => blank.dataset.userAnswer);
+    
+    if (filledAnswers.length === 0) {
+        alert('Please fill at least one answer before submitting.');
+        return;
+    }
+
     let correctCount = 0;
     let totalQuestions = data.PR_QUESTIONS.length;
     let questionCorrect = new Array(totalQuestions).fill(true);
 
-    // Group blanks by container
     const containers = document.querySelectorAll('.container');
     
     containers.forEach((container, questionIndex) => {
@@ -208,6 +219,61 @@ function checkAnswers() {
 
     correctCount = questionCorrect.filter(isCorrect => isCorrect).length;
     document.getElementById('result').textContent = `Correct: ${correctCount}/${totalQuestions}`;
+
+    // Change button to "Show Answers"
+    const submitButton = document.getElementById('submitBtn');
+    
+    submitButton.textContent = 'Show Answers';
+    submitButton.onclick = showCorrectAnswers;
+}
+
+function showCorrectAnswers() {
+    const containers = document.querySelectorAll('.container');
+    
+    containers.forEach((container) => {
+        const blanksInContainer = container.querySelectorAll('.blank');
+        
+        blanksInContainer.forEach(blank => {
+            const correctAnswer = blank.dataset.answer || blank.dataset.answerImg;
+            
+            // Reset border to default
+            blank.removeAttribute('style');
+            
+            // Show correct answer
+            if (correctAnswer.endsWith('.jpeg') || correctAnswer.endsWith('.png') || correctAnswer.endsWith('.jpg')) {
+                blank.innerHTML = `<img src='${correctAnswer}' style='width:50px; height:50px;'>`;
+            } else {
+                blank.textContent = correctAnswer;
+            }
+        });
+    });
+
+    const resetButton = document.getElementById('resetBtn');
+    resetButton.style.display = 'none';
+    // Change button to "Reset"
+    const button = document.getElementById('submitBtn');
+    button.textContent = 'Reset';
+    button.onclick = resetActivity;
+}
+
+function resetActivity() {
+    // Clear all blanks
+    document.querySelectorAll('.blank').forEach(blank => {
+        blank.innerHTML = '';
+        blank.removeAttribute('style');
+        blank.removeAttribute('data-user-answer');
+    });
+
+    // Reset result text
+    document.getElementById('result').textContent = '';
+
+    // Reset button to original state
+    const button = document.getElementById('submitBtn');
+    button.textContent = 'Submit';
+    button.onclick = checkAnswers;
+
+    // Regenerate activity
+    generateActivity();
 }
 
 generateActivity();

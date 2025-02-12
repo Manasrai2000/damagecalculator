@@ -5,15 +5,6 @@ body {
     padding: 20px;
 }
 
-.blank {
-    display: inline-block;
-    width: 100px;
-    height: 30px;
-    border: 2px dashed #ccc;
-    text-align: center;
-    vertical-align: middle;
-}
-
 .draggable {
     display: inline-block;
     padding: 5px 10px;
@@ -36,7 +27,6 @@ img {
     text-align: start;
     margin: 10px auto;
     border-radius: 10px;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
     max-width: 600px;
 }
 
@@ -44,13 +34,13 @@ img {
     display: inline-block;
     width: 100px;
     height: 30px;
-    border: 2px dashed #007BFF;
+    border: 2px dashed #979797;
+    margin: 2px 0px;
     text-align: center;
     vertical-align: middle;
-    font-weight: bold;
     line-height: 30px;
-    color: #007BFF;
-    background-color: #e9f5ff;
+    color: #000000;
+    background-color: #f1f1f1;
     border-radius: 5px;
 }
 
@@ -91,4 +81,8 @@ button {
 
 button:hover {
     background-color: #218838;
+}
+
+#resetBtn{
+    display: none;
 }
