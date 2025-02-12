@@ -50,8 +50,28 @@ function addDragAndDropEvents() {
     let initialY = 0;
     let currentX = 0;
     let currentY = 0;
+    let scrollInterval = null;
 
-    // Helper function to handle drops
+    // Auto-scroll function
+    function checkScrolling(y) {
+        const scrollThreshold = 50; // pixels from bottom to trigger scroll
+        const scrollSpeed = 5; // pixels per scroll
+        const windowHeight = window.innerHeight;
+        
+        // Clear any existing scroll interval
+        if (scrollInterval) {
+            clearInterval(scrollInterval);
+            scrollInterval = null;
+        }
+
+        // If near bottom of screen, start scrolling
+        if (y > windowHeight - scrollThreshold) {
+            scrollInterval = setInterval(() => {
+                window.scrollBy(0, scrollSpeed);
+            }, 16); // ~60fps
+        }
+    }
+
     function handleDrop(dropTarget, draggable) {
         if (!dropTarget || !dropTarget.classList.contains('blank')) return;
         
@@ -64,9 +84,7 @@ function addDragAndDropEvents() {
         dropTarget.dataset.userAnswer = word;
     }
 
-    // Add events to draggable items
     document.querySelectorAll('.draggable').forEach(item => {
-        // Keep desktop drag and drop
         item.addEventListener('dragstart', event => {
             event.dataTransfer.setData('text', event.target.dataset.word);
         });
@@ -76,15 +94,12 @@ function addDragAndDropEvents() {
             draggedItem = item;
             const touch = event.touches[0];
             
-            // Store initial positions
             const rect = item.getBoundingClientRect();
             initialX = touch.clientX - rect.left;
             initialY = touch.clientY - rect.top;
             
-            // Add visual feedback
             item.classList.add('dragging');
             
-            // Create ghost element for visual feedback
             const clone = item.cloneNode(true);
             clone.style.opacity = '0.5';
             clone.style.position = 'fixed';
@@ -101,7 +116,9 @@ function addDragAndDropEvents() {
             currentX = touch.clientX - initialX;
             currentY = touch.clientY - initialY;
 
-            // Update ghost element position
+            // Check for auto-scrolling
+            checkScrolling(touch.clientY);
+
             const ghost = document.getElementById('dragGhost');
             if (ghost) {
                 ghost.style.left = `${currentX}px`;
@@ -113,13 +130,17 @@ function addDragAndDropEvents() {
             event.preventDefault();
             if (!draggedItem) return;
 
+            // Clear scroll interval if it exists
+            if (scrollInterval) {
+                clearInterval(scrollInterval);
+                scrollInterval = null;
+            }
+
             const touch = event.changedTouches[0];
             const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
             
-            // Handle the drop
             handleDrop(dropTarget, draggedItem);
 
-            // Clean up
             draggedItem.classList.remove('dragging');
             const ghost = document.getElementById('dragGhost');
             if (ghost) ghost.remove();
@@ -127,7 +148,6 @@ function addDragAndDropEvents() {
         });
     });
 
-    // Add events to drop zones
     document.querySelectorAll('.blank').forEach(blank => {
         blank.addEventListener('dragover', event => {
             event.preventDefault();
