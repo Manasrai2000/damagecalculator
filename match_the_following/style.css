@@ -66,29 +66,17 @@ body {
     border-color: #2196f3;
 }
 
-/* .complete {
-    background: #4caf50 !important;
-    border-color: #45a049;
-    color: white;
-}
-
-.incorrect {
-    background: #ff5252 !important;
-    border-color: #ff1744;
-    color: white;
-} */
-
 .complete {
-    background-color: lightgrey !important; /* Light grey for completed items */
+    background-color: lightgrey !important;
 }
 
 .correct {
-    background-color: #4caf50 !important; /* Green when correct */
+    background-color: #4caf50 !important; 
     color: white;
 }
 
 .incorrect {
-    background-color: #f44336 !important; /* Red when incorrect */
+    background-color: #f44336 !important;
     color: white;
 }
 
