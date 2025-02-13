@@ -7,6 +7,13 @@ const ctx = canvas.getContext('2d');
 document.getElementById('title').textContent = data.PR_TITLE;
 document.getElementById('heading').textContent = data.PR_HEADING;
 
+const showAnswerBtn = document.getElementById("showAnswerBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+// Initially hide show answer & reset buttons
+showAnswerBtn.style.display = "none";
+resetBtn.style.display = "none";
+
 function initializeGame() {
     const leftColumn = document.querySelector('.left-column');
     const rightColumn = document.querySelector('.right-column');
@@ -53,12 +60,10 @@ function createItem(content, side, index) {
 }
 
 function handleClick(e) {
-    e.preventDefault(); // Prevent unintended double clicks
+    e.preventDefault();
 
-    let clickedItem = e.target.closest('.item'); // Ensure only .item is selected
+    let clickedItem = e.target.closest('.item');
     if (!clickedItem) return;
-
-    console.log("Item Clicked:", clickedItem.dataset.index, clickedItem.dataset.side);
 
     if (clickedItem.classList.contains('complete')) return;
 
@@ -81,7 +86,7 @@ function handleClick(e) {
             leftItem.classList.add('complete');
             rightItem.classList.add('complete');
 
-            drawConnections();
+            drawConnections("darkorange"); // Default to dark orange
         }
 
         selectedItem.classList.remove('selected');
@@ -89,7 +94,7 @@ function handleClick(e) {
     }
 }
 
-function drawConnections() {
+function drawConnections(color = "darkorange") {
     const container = document.querySelector('.game-container');
     const rect = container.getBoundingClientRect();
 
@@ -107,8 +112,8 @@ function drawConnections() {
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(endX, endY);
-        ctx.strokeStyle = '#2196f3';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
         ctx.stroke();
     });
 }
@@ -136,37 +141,106 @@ window.addEventListener('resize', () => {
     makeResponsive();
 });
 
-// Initialize game and styles
-initializeGame();
-makeResponsive();
-
 function checkAnswers() {
     let score = 0;
     const totalQuestions = data.PR_QUESTIONS.length;
 
     matches.forEach((rightItem, leftItem) => {
         const leftIndex = parseInt(leftItem.dataset.index);
-        let rightValue = '';
-
-        // Get the value based on whether it's an image or text
-        if (rightItem.querySelector('img')) {
-            rightValue = rightItem.querySelector('img').alt;
-        } else {
-            rightValue = rightItem.textContent;
-        }
+        let rightValue = rightItem.querySelector('img') 
+            ? rightItem.querySelector('img').alt 
+            : rightItem.textContent;
 
         const correctAnswer = data.PR_QUESTIONS[leftIndex].PR_DATA[0].PR_ANSWER.PR_VALUE;
         const correctValue = correctAnswer.split('/').pop().split('.')[0];
 
         if (rightValue === correctValue) {
             score++;
-            leftItem.classList.remove('incorrect');
-            rightItem.classList.remove('incorrect');
+            drawSingleConnection(leftItem, rightItem, "green"); // Green if correct
         } else {
-            leftItem.classList.add('incorrect');
-            rightItem.classList.add('incorrect');
+            drawSingleConnection(leftItem, rightItem, "red"); // Red if incorrect
         }
     });
 
     document.getElementById('score').textContent = `Score: ${score}/${totalQuestions}`;
+
+    // Show "Show Answer" & "Reset" buttons
+    showAnswerBtn.style.display = "inline-block";
+    resetBtn.style.display = "inline-block";
 }
+
+function drawConnectionsByScore() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    matches.forEach((rightItem, leftItem) => {
+        const leftIndex = parseInt(leftItem.dataset.index);
+        let rightValue = rightItem.querySelector('img')
+            ? rightItem.querySelector('img').alt
+            : rightItem.textContent;
+
+        const correctAnswer = data.PR_QUESTIONS[leftIndex].PR_DATA[0].PR_ANSWER.PR_VALUE;
+        const correctValue = correctAnswer.split('/').pop().split('.')[0];
+
+        const leftRect = leftItem.getBoundingClientRect();
+        const rightRect = rightItem.getBoundingClientRect();
+        const startX = leftRect.right - container.getBoundingClientRect().left;
+        const startY = leftRect.top - container.getBoundingClientRect().top + leftRect.height / 2;
+        const endX = rightRect.left - container.getBoundingClientRect().left;
+        const endY = rightRect.top - container.getBoundingClientRect().top + rightRect.height / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = rightValue === correctValue ? "green" : "red";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    });
+}
+
+function drawSingleConnection(leftItem, rightItem, color) {
+    const container = document.querySelector('.game-container');
+    const rect = container.getBoundingClientRect();
+
+    const leftRect = leftItem.getBoundingClientRect();
+    const rightRect = rightItem.getBoundingClientRect();
+
+    const startX = leftRect.right - rect.left;
+    const startY = leftRect.top - rect.top + leftRect.height / 2;
+    const endX = rightRect.left - rect.left;
+    const endY = rightRect.top - rect.top + rightRect.height / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+}
+
+function showCorrectAnswers() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous lines
+
+    data.PR_QUESTIONS.forEach((question, index) => {
+        const leftItem = document.querySelector(`.left-column .item[data-index="${index}"]`);
+        const correctAnswerValue = question.PR_DATA[0].PR_ANSWER.PR_VALUE.split('/').pop().split('.')[0];
+
+        // Find the correct rightItem based on its image/text value
+        const rightItems = document.querySelectorAll('.right-column .item');
+        let rightItem = null;
+
+        rightItems.forEach((item) => {
+            let itemValue = item.querySelector('img') ? item.querySelector('img').alt : item.textContent;
+            if (itemValue === correctAnswerValue) {
+                rightItem = item;
+            }
+        });
+
+        if (leftItem && rightItem) {
+            drawSingleConnection(leftItem, rightItem, "green"); // Always draw correct answers in green
+        }
+    });
+}
+
+// Initialize game and styles
+initializeGame();
+makeResponsive();

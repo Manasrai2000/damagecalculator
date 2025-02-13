@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Match The Following</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -25,14 +27,16 @@
                     <div class="column-header">Column B</div>
                 </div>
             </div>
-            <button class="submit-btn" onclick="checkAnswers()">Submit Answers</button>
+            <center>
+                <button class="submit-btn" onclick="checkAnswers()" id="submitBtn">Submit Answers</button>
+                <button class="submit-btn" onclick="location.reload()" id="resetBtn">Reset Answers</button>
+                <button class="submit-btn" onclick="showCorrectAnswers()" id="showAnswerBtn">Show Answers</button>
+            </center>
             <div class="score-display" id="score"></div>
         </div>
     </div>
     <script src="data.js"></script>
     <script src="main.js"></script>
 </body>
+
 </html>
-
-
-
