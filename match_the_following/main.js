@@ -10,23 +10,20 @@ document.getElementById('heading').textContent = data.PR_HEADING;
 function initializeGame() {
     const leftColumn = document.querySelector('.left-column');
     const rightColumn = document.querySelector('.right-column');
-    
-    // Clear existing content except headers
-    while (leftColumn.children.length > 1) leftColumn.removeChild(leftColumn.lastChild);
-    while (rightColumn.children.length > 1) rightColumn.removeChild(rightColumn.lastChild);
 
-    // Create shuffled array for right column
-    const rightItems = [...data.PR_QUESTIONS];
-    for (let i = rightItems.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [rightItems[i], rightItems[j]] = [rightItems[i], rightItems[j]];
-    }
+    // Clear columns while keeping the headers
+    leftColumn.innerHTML = "<h3>Column A</h3>";
+    rightColumn.innerHTML = "<h3>Column B</h3>";
+
+    // Shuffle only Column B answers
+    let shuffledAnswers = [...data.PR_QUESTIONS.map(q => q.PR_DATA[0].PR_ANSWER)];
+    shuffledAnswers.sort(() => Math.random() - 0.5);
 
     // Add items to columns
     data.PR_QUESTIONS.forEach((question, index) => {
         const leftItem = createItem(question.PR_DATA[0].PR_QUESTION, 'left', index);
-        const rightItem = createItem(rightItems[index].PR_DATA[0].PR_ANSWER, 'right', index);
-        
+        const rightItem = createItem(shuffledAnswers[index], 'right', index);
+
         leftColumn.appendChild(leftItem);
         rightColumn.appendChild(rightItem);
     });
@@ -39,25 +36,30 @@ function createItem(content, side, index) {
     item.className = 'item';
     item.dataset.side = side;
     item.dataset.index = index;
-    
-    // Check if content is an image or text
+
     if (content.PR_TYPE === "img") {
         const img = document.createElement('img');
-        // Using placeholder API for demo since actual images might not be available
         img.src = `./${content.PR_VALUE}`;
         img.alt = content.PR_VALUE.split('/').pop().split('.')[0];
         item.appendChild(img);
     } else {
         item.textContent = content.PR_VALUE;
     }
-    
-    item.addEventListener('click', handleClick);
+
+    // Ensure it works on both mobile & desktop
+    item.addEventListener('pointerdown', handleClick);
+
     return item;
 }
 
 function handleClick(e) {
-    const clickedItem = e.target;
-    
+    e.preventDefault(); // Prevent unintended double clicks
+
+    let clickedItem = e.target.closest('.item'); // Ensure only .item is selected
+    if (!clickedItem) return;
+
+    console.log("Item Clicked:", clickedItem.dataset.index, clickedItem.dataset.side);
+
     if (clickedItem.classList.contains('complete')) return;
 
     if (!selectedItem) {
@@ -73,13 +75,12 @@ function handleClick(e) {
         if (selectedItem.dataset.side !== clickedItem.dataset.side) {
             const leftItem = selectedItem.dataset.side === 'left' ? selectedItem : clickedItem;
             const rightItem = selectedItem.dataset.side === 'right' ? selectedItem : clickedItem;
-            
-            // Update matches
+
             matches.set(leftItem, rightItem);
-            
+
             leftItem.classList.add('complete');
             rightItem.classList.add('complete');
-            
+
             drawConnections();
         }
 
@@ -91,20 +92,18 @@ function handleClick(e) {
 function drawConnections() {
     const container = document.querySelector('.game-container');
     const rect = container.getBoundingClientRect();
-    
-    // Clear canvas
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw all connections
+
     matches.forEach((rightItem, leftItem) => {
         const leftRect = leftItem.getBoundingClientRect();
         const rightRect = rightItem.getBoundingClientRect();
-        
+
         const startX = leftRect.right - rect.left;
-        const startY = leftRect.top - rect.top + leftRect.height/2;
+        const startY = leftRect.top - rect.top + leftRect.height / 2;
         const endX = rightRect.left - rect.left;
-        const endY = rightRect.top - rect.top + rightRect.height/2;
-        
+        const endY = rightRect.top - rect.top + rightRect.height / 2;
+
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(endX, endY);
@@ -122,37 +121,52 @@ function resizeCanvas() {
     drawConnections();
 }
 
+// Adjust styles dynamically for mobile
+function makeResponsive() {
+    const container = document.querySelector('.game-container');
+    if (window.innerWidth < 600) {
+        container.style.flexDirection = "column"; // Stack items vertically
+    } else {
+        container.style.flexDirection = "row"; // Normal side-by-side layout
+    }
+}
+
+window.addEventListener('resize', () => {
+    resizeCanvas();
+    makeResponsive();
+});
+
+// Initialize game and styles
+initializeGame();
+makeResponsive();
+
 function checkAnswers() {
-            let score = 0;
-            const totalQuestions = data.PR_QUESTIONS.length;
+    let score = 0;
+    const totalQuestions = data.PR_QUESTIONS.length;
 
-            matches.forEach((rightItem, leftItem) => {
-                const leftIndex = parseInt(leftItem.dataset.index);
-                let rightValue = '';
-                
-                // Get the value based on whether it's an image or text
-                if (rightItem.querySelector('img')) {
-                    rightValue = rightItem.querySelector('img').alt;
-                } else {
-                    rightValue = rightItem.textContent;
-                }
+    matches.forEach((rightItem, leftItem) => {
+        const leftIndex = parseInt(leftItem.dataset.index);
+        let rightValue = '';
 
-                const correctAnswer = data.PR_QUESTIONS[leftIndex].PR_DATA[0].PR_ANSWER.PR_VALUE;
-                const correctValue = correctAnswer.split('/').pop().split('.')[0];
-
-                if (rightValue === correctValue) {
-                    score++;
-                    leftItem.classList.remove('incorrect');
-                    rightItem.classList.remove('incorrect');
-                } else {
-                    leftItem.classList.add('incorrect');
-                    rightItem.classList.add('incorrect');
-                }
-            });
-
-            document.getElementById('score').textContent = `Score: ${score}/${totalQuestions}`;
+        // Get the value based on whether it's an image or text
+        if (rightItem.querySelector('img')) {
+            rightValue = rightItem.querySelector('img').alt;
+        } else {
+            rightValue = rightItem.textContent;
         }
 
-// Initialize game and set up event listeners
-window.addEventListener('resize', resizeCanvas);
-initializeGame();
+        const correctAnswer = data.PR_QUESTIONS[leftIndex].PR_DATA[0].PR_ANSWER.PR_VALUE;
+        const correctValue = correctAnswer.split('/').pop().split('.')[0];
+
+        if (rightValue === correctValue) {
+            score++;
+            leftItem.classList.remove('incorrect');
+            rightItem.classList.remove('incorrect');
+        } else {
+            leftItem.classList.add('incorrect');
+            rightItem.classList.add('incorrect');
+        }
+    });
+
+    document.getElementById('score').textContent = `Score: ${score}/${totalQuestions}`;
+}
