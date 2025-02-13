@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match The Following</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="title"></h1>
+            <p id="heading"></p>
+        </div>
+
+        <div class="game-container">
+            <div id="canvas-container">
+                <canvas id="connectionsCanvas"></canvas>
+            </div>
+            <div class="matching-area">
+                <div class="column left-column">
+                    <div class="column-header">Column A</div>
+                </div>
+                <div class="column right-column">
+                    <div class="column-header">Column B</div>
+                </div>
+            </div>
+            <button class="submit-btn" onclick="checkAnswers()">Submit Answers</button>
+            <div class="score-display" id="score"></div>
+        </div>
+    </div>
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
+
+
+
