@@ -1,10 +1,11 @@
 class TrueFalseActivity {
     constructor() {
         this.answerFormats = {
-            'english': ['true', 'false'],
+            'english': ['T', 'F'],
             'symbols': ['✓', '✕'],
             'hindi': ['सत्य', 'असत्य'],
-            'sahi': ['सही', 'गलत']
+            'sahi': ['सही', 'गलत'],
+            'ha': ['हाँ', 'नहीं']
         };
     }
 

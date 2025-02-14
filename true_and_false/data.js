@@ -7,43 +7,43 @@ var data = {
         {
             "PR_QUESTION": "is this is a apple tree ?",
             "PR_QUESTION_IMG": "./img/apple_tree.jpg",
-            "PR_ANSWER": "✓",
+            "PR_ANSWER": "हाँ",
             "PR_ANSWER_IMG": ""
         },
         {
             "PR_QUESTION": "does dog like this ?",
             "PR_QUESTION_IMG": "./img/dog_bone.jpg",
-            "PR_ANSWER": "✓",
+            "PR_ANSWER": "हाँ",
             "PR_ANSWER_IMG": ""
         },
         {
             "PR_QUESTION": "is this is a nest ?",
             "PR_QUESTION_IMG": "./img/nest.jpg",
-            "PR_ANSWER": "✓",
+            "PR_ANSWER": "हाँ",
             "PR_ANSWER_IMG": ""
         },
         {
             "PR_QUESTION": "is this is a car ?",
             "PR_QUESTION_IMG": "./img/road.jpg",
-            "PR_ANSWER": "✕",
+            "PR_ANSWER": "नहीं",
             "PR_ANSWER_IMG": ""
         },
         {
             "PR_QUESTION": "is car riding on this ?",
             "PR_QUESTION_IMG": "./img/road.jpg",
-            "PR_ANSWER": "✓",
+            "PR_ANSWER": "हाँ",
             "PR_ANSWER_IMG": ""
         },
         {
             "PR_QUESTION": "is this water ?",
             "PR_QUESTION_IMG": "./img/water.jpg",
-            "PR_ANSWER": "✓",
+            "PR_ANSWER": "हाँ",
             "PR_ANSWER_IMG": ""
         },
         {
-            "PR_QUESTION": "is this is a banana tree ?",
-            "PR_QUESTION_IMG": "./img/apple_tree.jpg",
-            "PR_ANSWER": "✕",
+            "PR_QUESTION": "is banana tree have small leafs?",
+            "PR_QUESTION_IMG": "",
+            "PR_ANSWER": "नहीं",
             "PR_ANSWER_IMG": ""
         }
     ]
