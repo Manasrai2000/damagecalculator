@@ -111,8 +111,8 @@ body {
     transform: scale(1.05);
 }
 
-#submitBtn {
-    display: block;
+#submitBtn,#showAnswerBtn,#resetBtn {
+    display: inline-block;
     margin: 20px auto;
     padding: 12px 30px;
     background: #2196F3;

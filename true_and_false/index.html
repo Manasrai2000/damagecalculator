@@ -4,53 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <title>True/False Activity</title>
-   <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div class="activity-container">
         <h1 id="title"></h1>
         <p id="heading"></p>
-        <div id="questions"></div>
         <div class="options" id="words"></div>
-        <button id="submitBtn">Check Answers</button>
+        <div id="questions"></div>
+        <center>
+            <button id="submitBtn">Submit</button>
+            <button id="showAnswerBtn">Show Answer</button>
+            <button id="resetBtn">Reset</button>
+        </center>
         <p id="result"></p>
     </div>
-<script src="main.js"></script>
+    <script src="data.js"></script>
+    <script src="main.js"></script>
     <script>
-       
-
-        // Example usage - replace this with your actual JSON data
-        const sampleData = {
-            "PR_TITLE": "Ch-15. The Phrases - Exercise 6",
-            "PR_TYPE": "True And False",
-            "PR_HEADING": "Listen and check the underlined words? Drag and drop (✓) if the underlined words are phrases or (✕) if they are not.",
-            "PR_PAGE_NO": 0,
-            "PR_QUESTIONS": [
-                {
-                    "PR_QUESTION_IMG": "../match_the_following/img/apple_tree.jpg", "PR_ANSWER": "✓"
-                },
-                {
-                    "PR_QUESTION": "hello, is this a apple tree",
-                    "PR_QUESTION_IMG": "../match_the_following/img/apple_tree.jpg", "PR_ANSWER": "✓"
-                },
-                {
-                    "PR_QUESTION": "hello, is this a apple tree",
-                    "PR_QUESTION_IMG": "../match_the_following/img/apple_tree.jpg", "PR_ANSWER": "✕"
-                },
-                {
-                    "PR_QUESTION": "hello, is this a apple tree",
-                    "PR_QUESTION_IMG": "../match_the_following/img/apple_tree.jpg", "PR_ANSWER": "✕"
-                },
-                {
-                    "PR_QUESTION": "hello, is this a apple tree",
-                    "PR_QUESTION_IMG": "../match_the_following/img/apple_tree.jpg", "PR_ANSWER": "✕"
-                }
-            ]
-        };
-
         // Load the activity with sample data
-        loadActivity(sampleData);
+        loadActivity(data);
     </script>
 </body>
 

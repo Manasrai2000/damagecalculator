@@ -5,50 +5,44 @@ var data = {
     "PR_PAGE_NO": 0,
     "PR_QUESTIONS": [
         {
-            "PR_QUESTION": "hello, is this a apple tree",
-            "PR_QUESTION_IMG": "/media/book-image/grammar-beeds-8/grammer_ch15_que_b1.jpeg",
+            "PR_QUESTION": "is this is a apple tree ?",
+            "PR_QUESTION_IMG": "./img/apple_tree.jpg",
             "PR_ANSWER": "✓",
             "PR_ANSWER_IMG": ""
         },
         {
-            "PR_QUESTION": "",
-            "PR_QUESTION_IMG": "/media/book-image/grammar-beeds-8/grammer_ch15_que_b2.jpeg",
+            "PR_QUESTION": "does dog like this ?",
+            "PR_QUESTION_IMG": "./img/dog_bone.jpg",
             "PR_ANSWER": "✓",
             "PR_ANSWER_IMG": ""
         },
         {
-            "PR_QUESTION": "",
-            "PR_QUESTION_IMG": "/media/book-image/grammar-beeds-8/grammer_ch15_que_b3.jpeg",
+            "PR_QUESTION": "is this is a nest ?",
+            "PR_QUESTION_IMG": "./img/nest.jpg",
             "PR_ANSWER": "✓",
             "PR_ANSWER_IMG": ""
         },
         {
-            "PR_QUESTION": "",
-            "PR_QUESTION_IMG": "/media/book-image/grammar-beeds-8/grammer_ch15_que_b4.jpeg",
+            "PR_QUESTION": "is this is a car ?",
+            "PR_QUESTION_IMG": "./img/road.jpg",
             "PR_ANSWER": "✕",
             "PR_ANSWER_IMG": ""
         },
         {
-            "PR_QUESTION": "",
-            "PR_QUESTION_IMG": "/media/book-image/grammar-beeds-8/grammer_ch15_que_b5.jpeg",
-            "PR_ANSWER": "✕",
-            "PR_ANSWER_IMG": ""
-        },
-        {
-            "PR_QUESTION": "",
-            "PR_QUESTION_IMG": "/media/book-image/grammar-beeds-8/grammer_ch15_que_b6.jpeg",
+            "PR_QUESTION": "is car riding on this ?",
+            "PR_QUESTION_IMG": "./img/road.jpg",
             "PR_ANSWER": "✓",
             "PR_ANSWER_IMG": ""
         },
         {
-            "PR_QUESTION": "",
-            "PR_QUESTION_IMG": "/media/book-image/grammar-beeds-8/grammer_ch15_que_b7.jpeg",
-            "PR_ANSWER": "✕",
+            "PR_QUESTION": "is this water ?",
+            "PR_QUESTION_IMG": "./img/water.jpg",
+            "PR_ANSWER": "✓",
             "PR_ANSWER_IMG": ""
         },
         {
-            "PR_QUESTION": "",
-            "PR_QUESTION_IMG": "/media/book-image/grammar-beeds-8/grammer_ch15_que_b8.jpeg",
+            "PR_QUESTION": "is this is a banana tree ?",
+            "PR_QUESTION_IMG": "./img/apple_tree.jpg",
             "PR_ANSWER": "✕",
             "PR_ANSWER_IMG": ""
         }

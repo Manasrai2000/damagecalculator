@@ -159,8 +159,7 @@ class TrueFalseActivity {
             }
             dropTarget.dataset.userAnswer = word;
             dropTarget.style.border = '2px dashed rgba(151, 151, 151, 0)';
-            // const resetButton = document.getElementById('resetBtn');
-            // resetButton.style.display = 'inline-block';
+            document.getElementById('resetBtn').style.display = 'inline-block';
         }
 
         document.querySelectorAll('.draggable').forEach(item => {
@@ -246,6 +245,32 @@ class TrueFalseActivity {
         });
     }
 
+    // Show correct answers
+    showAnswer() {
+        document.querySelectorAll('.blank').forEach(zone => {
+            zone.textContent = zone.getAttribute('data-answer');
+            zone.classList.add('correct');
+            zone.classList.remove('incorrect');
+        });
+        document.getElementById('submitBtn').style.display = 'none';
+        document.getElementById('showAnswerBtn').style.display = 'none';
+        document.getElementById('result').textContent = 'Correct answers displayed!';
+    }
+
+    // Reset the game to initial state
+    resetGame() {
+        document.querySelectorAll('.blank').forEach(zone => {
+            zone.textContent = ''; // Clear user input
+            zone.style.border = '2px dashed #666';
+            zone.classList.remove('correct', 'incorrect');
+        });
+
+        document.getElementById('result').textContent = '';
+        document.getElementById('showAnswerBtn').style.display = 'none';
+        document.getElementById('resetBtn').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'inline-block';
+    }
+
     // Add submit button functionality
     addSubmitEvent() {
         document.getElementById('submitBtn').addEventListener('click', () => {
@@ -266,7 +291,9 @@ class TrueFalseActivity {
                     zone.classList.remove('correct');
                 }
             });
-
+            document.getElementById('showAnswerBtn').style.display = 'inline-block';
+            document.getElementById('resetBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').style.display = 'none';
             const resultDiv = document.getElementById('result');
             resultDiv.textContent = `Score: ${correct}/${total}`;
         });
@@ -283,6 +310,17 @@ class TrueFalseActivity {
 
 // Initialize the activity
 const activity = new TrueFalseActivity();
+
+// Function to load activity with JSON data
+function loadActivity(jsonData) {
+    activity.init(jsonData);
+}
+
+// Example: Adding event listeners for "Show Answer" and "Reset" buttons
+document.getElementById('showAnswerBtn').addEventListener('click', () => activity.showAnswer());
+document.getElementById('resetBtn').addEventListener('click', () => activity.resetGame());
+document.getElementById('showAnswerBtn').style.display = 'none';
+document.getElementById('resetBtn').style.display = 'none';
 
 // Function to load activity with JSON data
 function loadActivity(jsonData) {
