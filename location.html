@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Location via Socket</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .container {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    h1 {
+      color: #4285f4;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    
+    button {
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 10px 0;
+      width: 100%;
+      max-width: 300px;
+    }
+    
+    button:hover {
+      background-color: #3367d6;
+    }
+    
+    button:disabled {
+      background-color: #cccccc;
+    }
+    
+    #locationResult {
+      margin-top: 20px;
+      padding: 15px;
+      border-left: 5px solid #4285f4;
+      background-color: #e8f0fe;
+      text-align: left;
+      font-size: 16px;
+      display: none;
+    }
+    
+    #status {
+      margin-top: 15px;
+      color: #666;
+      font-style: italic;
+    }
+    
+    #permissionHelp {
+      margin-top: 20px;
+      padding: 15px;
+      border-left: 5px solid #fbbc05;
+      background-color: #fff9e6;
+      text-align: left;
+      display: none;
+    }
+    
+    .location-data {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .location-item {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 4px solid #4285f4;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+      vertical-align: middle;
+      display: none;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Location Sender</h1>
+    
+    <div id="buttonArea">
+      <button id="getLocationBtn">
+        <span id="loader" class="loader"></span>
+        Get and Send My Location
+      </button>
+    </div>
+    
+    <div id="status">Ready to send location data.</div>
+    
+    <div id="locationResult"></div>
+    
+    <div id="permissionHelp">
+      <h3>Location Permission Required</h3>
+      <p>This app needs access to your location. Please follow these steps:</p>
+      
+      <div id="androidHelp">
+        <strong>For Android:</strong>
+        <ol>
+          <li>Tap the lock icon in your browser's address bar</li>
+          <li>Select "Site settings"</li>
+          <li>Tap on "Location" and select "Allow"</li>
+          <li>Reload this page</li>
+        </ol>
+      </div>
+      
+      <div id="iphoneHelp">
+        <strong>For iPhone/iPad:</strong>
+        <ol>
+          <li>Open Settings app</li>
+          <li>Scroll down and tap on your browser (Safari, Chrome, etc.)</li>
+          <li>Tap on "Location" and select "Allow"</li>
+          <li>Return to this page and reload</li>
+        </ol>
+      </div>
+      
+      <button id="reloadBtn">Reload Page</button>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const getLocationBtn = document.getElementById('getLocationBtn');
+    const locationResult = document.getElementById('locationResult');
+    const statusElement = document.getElementById('status');
+    const permissionHelp = document.getElementById('permissionHelp');
+    const androidHelp = document.getElementById('androidHelp');
+    const iphoneHelp = document.getElementById('iphoneHelp');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const loader = document.getElementById('loader');
+    
+    // Initialize socket connection
+    let socket;
+    try {
+      socket = io('http://192.168.172.141:3000'); // Replace with your server address
+      
+      socket.on('connect', () => {
+        console.log('Connected to socket server');
+        statusElement.textContent = 'Connected to server. Ready to send location.';
+      });
+      
+      socket.on('connect_error', (error) => {
+        console.error('Socket connection error:', error);
+        statusElement.textContent = 'Server connection error. Check console for details.';
+      });
+      
+      socket.on('locationReceived', (data) => {
+        statusElement.textContent = 'Location sent successfully!';
+        console.log('Server confirmed location receipt:', data);
+      });
+    } catch (error) {
+      console.error('Error initializing socket:', error);
+      statusElement.textContent = 'Error connecting to server. Check console for details.';
+    }
+    
+    // Check if Geolocation API is supported
+    if (!navigator.geolocation) {
+      getLocationBtn.disabled = true;
+      statusElement.textContent = 'Geolocation is not supported by this browser.';
+    }
+    
+    // Detect device type
+    function isMobileDevice() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
+    // Detect iOS
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+    
+    // Show appropriate help based on device
+    function showPermissionHelp() {
+      permissionHelp.style.display = 'block';
+      
+      if (isIOS()) {
+        androidHelp.style.display = 'none';
+        iphoneHelp.style.display = 'block';
+      } else {
+        androidHelp.style.display = 'block';
+        iphoneHelp.style.display = 'none';
+      }
+    }
+    
+    // Handle location acquisition and sending
+    getLocationBtn.addEventListener('click', function() {
+      // Show loading indicator
+      loader.style.display = 'inline-block';
+      getLocationBtn.disabled = true;
+      statusElement.textContent = 'Requesting location...';
+      
+      // Force the permission prompt with these options
+      const options = {
+        enableHighAccuracy: true,  // Request the best possible result
+        timeout: 10000,            // Time to wait for reading (10 seconds)
+        maximumAge: 0              // Force a fresh location reading, don't use cached
+      };
+      
+      // Request location
+      navigator.geolocation.getCurrentPosition(
+        // Success callback
+        function(position) {
+          // Hide loading indicator
+          loader.style.display = 'none';
+          getLocationBtn.disabled = false;
+          
+          // Get coordinates
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const accuracy = position.coords.accuracy;
+          const timestamp = new Date(position.timestamp).toLocaleTimeString();
+          
+          // Display results
+          locationResult.style.display = 'block';
+          locationResult.innerHTML = `
+            <div class="location-data">
+              <div class="location-item"><strong>Latitude:</strong> <span>${lat.toFixed(6)}</span></div>
+              <div class="location-item"><strong>Longitude:</strong> <span>${lng.toFixed(6)}</span></div>
+              <div class="location-item"><strong>Accuracy:</strong> <span>${accuracy.toFixed(1)} meters</span></div>
+              <div class="location-item"><strong>Time:</strong> <span>${timestamp}</span></div>
+            </div>
+          `;
+          
+          // Prepare data package
+          const locationData = {
+            lat: lat,
+            lng: lng,
+            accuracy: accuracy,
+            timestamp: new Date().toISOString(),
+            device: navigator.userAgent
+          };
+          
+          // Send to server if socket is connected
+          if (socket && socket.connected) {
+            statusElement.textContent = 'Sending location to server...';
+            socket.emit('sendLocation', locationData);
+            console.log('Location sent to server:', locationData);
+          } else {
+            statusElement.textContent = 'Location acquired, but server connection not available.';
+            console.warn('Socket not connected - location not sent');
+          }
+        },
+        
+        // Error callback
+        function(error) {
+          // Hide loading indicator
+          loader.style.display = 'none';
+          getLocationBtn.disabled = false;
+          
+          console.error('Geolocation error:', error);
+          
+          switch(error.code) {
+            case error.PERMISSION_DENIED:
+              statusElement.textContent = 'Location permission denied.';
+              showPermissionHelp();
+              break;
+              
+            case error.POSITION_UNAVAILABLE:
+              statusElement.textContent = 'Location information is unavailable. Check device settings.';
+              break;
+              
+            case error.TIMEOUT:
+              statusElement.textContent = 'Location request timed out. Please try again.';
+              break;
+              
+            default:
+              statusElement.textContent = 'An unknown error occurred while getting location.';
+              break;
+          }
+        },
+        
+        // Options
+        options
+      );
+    });
+    
+    // Reload button handler
+    reloadBtn.addEventListener('click', function() {
+      window.location.reload();
+    });
+    
+    // Immediately request geolocation on page load for mobile devices
+    // This helps trigger the permission prompt right away
+    if (isMobileDevice()) {
+      setTimeout(function() {
+        statusElement.textContent = 'Checking location permission...';
+        
+        navigator.permissions.query({name: 'geolocation'}).then(function(result) {
+          if (result.state === 'prompt') {
+            // For mobile browsers, we want to trigger the permission dialog
+            // We'll use getCurrentPosition with a very short timeout
+            navigator.geolocation.getCurrentPosition(
+              function() {}, // Empty success callback
+              function() {}, // Empty error callback
+              { timeout: 1 } // Very short timeout to just trigger the prompt
+            );
+          }
+        }).catch(function(error) {
+          // Permissions API not supported, fall back to standard geolocation
+          console.log('Permissions API not supported, using fallback');
+        });
+      }, 1000); // Small delay after page load
+    }
+  </script>
+</body>
+</html>
