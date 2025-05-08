@@ -161,7 +161,7 @@
     // Initialize socket connection
     let socket;
     try {
-      socket = io('http://192.168.172.141:3000'); // Replace with your server address
+      socket = io('http://192.168.1.4:3000'); // Replace with your server address
       
       socket.on('connect', () => {
         console.log('Connected to socket server');
