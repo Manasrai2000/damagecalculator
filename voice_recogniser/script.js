@@ -1,15 +1,21 @@
 /**
  * VoiceFlow - Professional Voice-to-Text Application
  * Author: Antigravity AI
+ * Mobile Stability Enhanced Version
  */
 
 class VoiceFlow {
     constructor() {
         this.recognition = null;
         this.isListening = false;
+        this.isStarting = false; // Prevents double-start errors
+        this.manualStop = false;  // Tracks if the user explicitly clicked stop
         this.transcript = '';
         this.history = JSON.parse(localStorage.getItem('vf_history') || '[]');
-
+        
+        // Mobile detection
+        this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
         // DOM Elements
         this.elements = {
             startBtn: document.getElementById('startBtn'),
@@ -36,11 +42,15 @@ class VoiceFlow {
         this.attachEventListeners();
         this.renderHistory();
         this.setupTheme();
+        
+        if (this.isMobile) {
+            console.log('Mobile device detected. Applying stability tweaks.');
+        }
     }
 
     setupRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
+        
         if (!SpeechRecognition) {
             this.showToast('Speech Recognition not supported in this browser.', 'error');
             this.elements.startBtn.disabled = true;
@@ -48,19 +58,25 @@ class VoiceFlow {
         }
 
         this.recognition = new SpeechRecognition();
+        
+        // Mobile Chrome often works better with continuous set to true but manually handled restarts
         this.recognition.continuous = true;
         this.recognition.interimResults = true;
-
+        this.recognition.maxAlternatives = 1;
+        
         this.recognition.onstart = () => {
             this.isListening = true;
+            this.isStarting = false;
             this.updateUIStatus();
+            console.log('Recognition started');
         };
 
         this.recognition.onresult = (event) => {
             let interimTranscript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    let finalPart = event.results[i][0].transcript;
+                const result = event.results[i];
+                if (result.isFinal) {
+                    let finalPart = result[0].transcript;
                     if (this.elements.timestampToggle.checked) {
                         const now = new Date();
                         const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -68,26 +84,103 @@ class VoiceFlow {
                     }
                     this.transcript += finalPart + ' ';
                 } else {
-                    interimTranscript += event.results[i][0].transcript;
+                    interimTranscript += result[0].transcript;
                 }
             }
             this.updateTranscription(interimTranscript);
         };
 
         this.recognition.onerror = (event) => {
+            this.isStarting = false;
             console.error('Speech recognition error:', event.error);
-            this.showToast(`Error: ${event.error}`, 'error');
-            this.stopListening();
+            
+            switch (event.error) {
+                case 'not-allowed':
+                    this.showToast('Microphone access denied.', 'error');
+                    this.stopListening(true);
+                    break;
+                case 'no-speech':
+                    // Silent pauses are common on mobile, just log it
+                    console.warn('No speech detected.');
+                    break;
+                case 'network':
+                    this.showToast('Network error.', 'error');
+                    break;
+                default:
+                    console.warn('Recognition error:', event.error);
+            }
         };
 
         this.recognition.onend = () => {
-            if (this.isListening) {
-                // Keep listening if we didn't explicitly stop (handles silent pauses)
-                this.recognition.start();
+            console.log('Recognition ended. Manual Stop:', this.manualStop);
+            
+            // Auto-restart logic for continuous listening, especially on mobile
+            if (!this.manualStop && this.isListening) {
+                this.restartRecognition();
             } else {
+                this.isListening = false;
+                this.isStarting = false;
                 this.updateUIStatus();
             }
         };
+    }
+
+    restartRecognition() {
+        if (this.isStarting || this.manualStop) return;
+        
+        this.isStarting = true;
+        const statusText = this.elements.statusIndicator.querySelector('.status-text');
+        if (statusText) statusText.innerText = 'Reconnecting...';
+        
+        // Small delay to prevent rapid-fire restarts
+        setTimeout(() => {
+            if (!this.manualStop && this.isListening) {
+                try {
+                    this.recognition.start();
+                } catch (e) {
+                    console.error('Restart failed:', e);
+                    this.isStarting = false;
+                }
+            }
+        }, 300);
+    }
+
+    startListening() {
+        if (!this.recognition || this.isStarting || this.isListening) return;
+        
+        this.manualStop = false;
+        this.isStarting = true;
+        this.recognition.lang = this.elements.languageSelect.value;
+        
+        try {
+            this.recognition.start();
+            this.showToast('Listening...', 'success');
+        } catch (e) {
+            console.error('Start failed:', e);
+            this.isStarting = false;
+            this.showToast('Failed to start recognition.', 'error');
+        }
+    }
+
+    stopListening(force = false) {
+        if (!this.recognition) return;
+        
+        this.manualStop = true;
+        this.isListening = false;
+        this.isStarting = false;
+        
+        try {
+            if (force) {
+                this.recognition.abort();
+            } else {
+                this.recognition.stop();
+            }
+        } catch (e) {
+            console.error('Stop error:', e);
+        }
+        
+        this.updateUIStatus();
+        this.showToast('Stopped listening.', 'info');
     }
 
     attachEventListeners() {
@@ -99,59 +192,44 @@ class VoiceFlow {
         this.elements.exportBtn.addEventListener('click', () => this.saveToHistory());
         this.elements.themeToggle.addEventListener('click', () => this.toggleTheme());
 
-        // Handle manual edits
         this.elements.transcriptionArea.addEventListener('input', () => {
             this.transcript = this.elements.transcriptionArea.innerText;
             this.updateStats();
         });
 
-        // Language change
         this.elements.languageSelect.addEventListener('change', () => {
             if (this.isListening) {
                 this.stopListening();
-                setTimeout(() => this.startListening(), 300);
+                setTimeout(() => this.startListening(), 400);
             }
         });
     }
 
-    startListening() {
-        if (!this.recognition) return;
-
-        this.recognition.lang = this.elements.languageSelect.value;
-        try {
-            this.recognition.start();
-            this.showToast('Listening...', 'success');
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    stopListening() {
-        if (!this.recognition) return;
-        this.isListening = false;
-        this.recognition.stop();
-        this.showToast('Stopped listening.', 'info');
-    }
-
     updateUIStatus() {
-        if (this.isListening) {
+        const isListening = this.isListening || this.isStarting;
+        
+        if (isListening) {
             this.elements.startBtn.classList.add('hidden');
             this.elements.stopBtn.classList.remove('hidden');
             this.elements.statusIndicator.classList.add('listening');
-            this.elements.statusIndicator.querySelector('.status-text').innerText = 'Listening...';
+            
+            const statusText = this.elements.statusIndicator.querySelector('.status-text');
+            if (statusText) {
+                statusText.innerText = this.isStarting ? 'Connecting...' : 'Listening...';
+            }
         } else {
             this.elements.startBtn.classList.remove('hidden');
             this.elements.stopBtn.classList.add('hidden');
             this.elements.statusIndicator.classList.remove('listening');
-            this.elements.statusIndicator.querySelector('.status-text').innerText = 'Ready';
+            
+            const statusText = this.elements.statusIndicator.querySelector('.status-text');
+            if (statusText) statusText.innerText = 'Ready';
         }
     }
 
     updateTranscription(interimText) {
-        // We use innerText to preserve line breaks if timestamps are on
         const finalHTML = this.transcript;
-        const interimHTML = `<span style="color: var(--text-secondary); opacity: 0.7;">${interimText}</span>`;
-
+        const interimHTML = `<span class="interim-text">${interimText}</span>`;
         this.elements.transcriptionArea.innerHTML = finalHTML + interimHTML;
         this.autoScroll();
         this.updateStats();
@@ -161,7 +239,7 @@ class VoiceFlow {
         const text = this.elements.transcriptionArea.innerText.trim();
         const chars = text.length;
         const words = text === '' ? 0 : text.split(/\s+/).length;
-
+        
         this.elements.charCount.innerText = `${chars} characters`;
         this.elements.wordCount.innerText = `${words} words`;
     }
@@ -171,7 +249,7 @@ class VoiceFlow {
     }
 
     clearText() {
-        if (confirm('Are you sure you want to clear all text?')) {
+        if (confirm('Clear all text?')) {
             this.transcript = '';
             this.elements.transcriptionArea.innerHTML = '';
             this.updateStats();
@@ -182,16 +260,14 @@ class VoiceFlow {
     copyToClipboard() {
         const text = this.elements.transcriptionArea.innerText;
         if (!text) return;
-
         navigator.clipboard.writeText(text).then(() => {
-            this.showToast('Copied to clipboard!', 'success');
+            this.showToast('Copied!', 'success');
         });
     }
 
     downloadAsTxt() {
         const text = this.elements.transcriptionArea.innerText;
         if (!text) return;
-
         const blob = new Blob([text], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -201,53 +277,38 @@ class VoiceFlow {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        this.showToast('Download started.', 'success');
+        this.showToast('Downloaded.', 'success');
     }
 
     saveToHistory() {
         const text = this.elements.transcriptionArea.innerText.trim();
-        if (!text) {
-            this.showToast('Nothing to save.', 'info');
-            return;
-        }
-
+        if (!text) return;
         const item = {
             id: Date.now(),
             text: text,
             date: new Date().toLocaleString(),
             preview: text.substring(0, 50) + (text.length > 50 ? '...' : '')
         };
-
         this.history.unshift(item);
-        if (this.history.length > 10) this.history.pop(); // Keep last 10
-
+        if (this.history.length > 10) this.history.pop();
         localStorage.setItem('vf_history', JSON.stringify(this.history));
         this.renderHistory();
-        this.showToast('Saved to history.', 'success');
+        this.showToast('Saved.', 'success');
     }
 
     renderHistory() {
         const list = this.elements.historyList;
         list.innerHTML = '';
-
         if (this.history.length === 0) {
             list.innerHTML = '<li class="empty-history">No history yet</li>';
             return;
         }
-
         this.history.forEach(item => {
             const li = document.createElement('li');
             li.className = 'history-item';
-            li.innerHTML = `
-                <span class="date">${item.date}</span>
-                <p class="preview">${item.preview}</p>
-            `;
+            li.innerHTML = `<span class="date">${item.date}</span><p class="preview">${item.preview}</p>`;
             li.onclick = () => {
-                if (this.transcript && confirm('Overwrite current text with this history item?')) {
-                    this.transcript = item.text;
-                    this.elements.transcriptionArea.innerText = item.text;
-                    this.updateStats();
-                } else if (!this.transcript) {
+                if (confirm('Load this transcription?')) {
                     this.transcript = item.text;
                     this.elements.transcriptionArea.innerText = item.text;
                     this.updateStats();
@@ -285,19 +346,12 @@ class VoiceFlow {
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
-
         let iconName = 'info';
         if (type === 'success') iconName = 'check-circle';
         if (type === 'error') iconName = 'alert-circle';
-
-        toast.innerHTML = `
-            <i data-lucide="${iconName}"></i>
-            <span>${message}</span>
-        `;
-
+        toast.innerHTML = `<i data-lucide="${iconName}"></i><span>${message}</span>`;
         container.appendChild(toast);
         lucide.createIcons();
-
         setTimeout(() => {
             toast.style.transform = 'translateX(120%)';
             toast.style.opacity = '0';
@@ -306,7 +360,7 @@ class VoiceFlow {
     }
 }
 
-// Instantiate the app
 document.addEventListener('DOMContentLoaded', () => {
     window.voiceFlow = new VoiceFlow();
 });
+
