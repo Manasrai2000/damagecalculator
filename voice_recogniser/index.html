@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceFlow | Professional Voice-to-Text</title>
+    <meta name="description" content="A premium real-time voice-to-text transcription tool built with Vanilla JS.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (via CDN for simplicity) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-theme">
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i data-lucide="mic"></i>
+                    <span>VoiceFlow</span>
+                </div>
+            </div>
+            <div class="history-section">
+                <h3>Recent Transcriptions</h3>
+                <ul id="historyList" class="history-list">
+                    <!-- History items will be injected here -->
+                    <li class="empty-history">No history yet</li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <button id="themeToggle" class="btn-icon" title="Toggle Theme">
+                    <i data-lucide="moon"></i>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <h1>New Transcription</h1>
+                    <div id="statusIndicator" class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <div class="select-wrapper">
+                        <i data-lucide="languages"></i>
+                        <select id="languageSelect">
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="es-ES">Spanish</option>
+                            <option value="fr-FR">French</option>
+                            <option value="de-DE">German</option>
+                            <option value="hi-IN">Hindi</option>
+                            <option value="ja-JP">Japanese</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <section class="editor-container">
+                <div class="editor-toolbar">
+                    <div class="toolbar-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="timestampToggle">
+                            <span class="slider"></span>
+                            <span class="label-text">Timestamps</span>
+                        </label>
+                    </div>
+                    <div class="toolbar-group">
+                        <div class="stats">
+                            <span id="charCount">0 characters</span>
+                            <span class="separator">|</span>
+                            <span id="wordCount">0 words</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transcription-area" id="transcriptionArea" contenteditable="true" spellcheck="false" placeholder="Your speech will appear here..."></div>
+
+                <div class="floating-controls">
+                    <div class="controls-card">
+                        <button id="clearBtn" class="btn-secondary" title="Clear Text">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                        <button id="startBtn" class="btn-primary main-action">
+                            <i data-lucide="mic" class="mic-icon"></i>
+                            <span>Start Listening</span>
+                        </button>
+                        <button id="stopBtn" class="btn-danger main-action hidden">
+                            <i data-lucide="square"></i>
+                            <span>Stop</span>
+                        </button>
+                        <div class="action-divider"></div>
+                        <button id="copyBtn" class="btn-secondary" title="Copy to Clipboard">
+                            <i data-lucide="copy"></i>
+                        </button>
+                        <button id="downloadBtn" class="btn-secondary" title="Download .txt">
+                            <i data-lucide="download"></i>
+                        </button>
+                        <button id="exportBtn" class="btn-secondary" title="Save to History">
+                            <i data-lucide="save"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
